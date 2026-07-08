@@ -632,7 +632,9 @@ h1, h2, h3, p { margin: 0; }
   padding: 10px 12px; font-size: 14px; font-weight: 600; color: var(--text);
   background: var(--surface);
   width: 100%;
+  min-width: 0;
   box-sizing: border-box;
+  height: 42px;
 }
 
 .switch-row { display: flex; align-items: center; justify-content: space-between; font-weight: 600; font-size: 13.5px; max-width: 240px; }
@@ -775,7 +777,7 @@ h1, h2, h3, p { margin: 0; }
   padding: 10px 12px; font-size: 14px; font-weight: 600;
   background: var(--bg-soft);
 }
-.confirm-msg { font-size: 13.5px; font-weight: 600; line-height: 1.6; padding: 20px 2px 4px; }
+.confirm-msg { font-size: 13.5px; font-weight: 600; line-height: 1.6; padding: 20px 2px 4px; white-space: pre-line; }
 .modal-foot-center { justify-content: center; }
 .action-row {
   width: 100%; text-align: left;
@@ -954,6 +956,82 @@ h1, h2, h3, p { margin: 0; }
 .btn-danger-solid { background: #FF4D4D; border-color: #FF4D4D; color: #fff; }
 .btn-danger-solid:hover { background: #ED3E3E; }
 
+/* ---------------- 설정: 데이터 관리 (iOS 설정 리스트 느낌) ---------------- */
+.settings-list { display: flex; flex-direction: column; }
+.settings-row {
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  border: none; background: none;
+  padding: 13px 2px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-main { display: flex; flex-direction: column; gap: 2px; }
+.settings-row-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.settings-row-sub { font-size: 11px; font-weight: 600; color: var(--text-faint); }
+.settings-row-chevron { font-size: 16px; color: var(--text-faint); }
+.settings-row-danger .settings-row-title { color: #E05252; }
+
+.backup-nudge {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--ember-soft);
+  border-radius: 13px; padding: 12px;
+  margin-top: 12px;
+}
+.backup-nudge img { width: 30px; height: 30px; object-fit: contain; flex-shrink: 0; }
+.backup-nudge span { font-size: 12px; font-weight: 700; color: var(--ember); line-height: 1.5; }
+
+.app-version-footer {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 6px 30px;
+  justify-content: center;
+}
+.app-version-footer img { width: 26px; height: 26px; object-fit: contain; opacity: .85; }
+.app-version-text { text-align: left; }
+.app-version-name { font-size: 12px; font-weight: 800; color: var(--text-muted); }
+.app-version-date { font-size: 10.5px; font-weight: 600; color: var(--text-faint); margin-top: 1px; }
+
+/* ---------------- 설정: 시험 관리 ---------------- */
+.exam-list { display: flex; flex-direction: column; }
+.exam-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--border);
+}
+.exam-row:last-child { border-bottom: none; }
+.exam-row-main { flex: 1; min-width: 0; }
+.exam-row-name { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.exam-row-meta { font-size: 11px; font-weight: 700; color: var(--text-faint); margin-top: 2px; }
+.exam-row-dday { font-size: 12px; font-weight: 800; color: var(--ember); margin-right: 2px; }
+.exam-row-edit {
+  width: 30px; height: 30px; flex-shrink: 0;
+  border: none; background: var(--bg-soft);
+  border-radius: 9px; font-size: 12px; color: var(--text-muted);
+}
+.exam-row-edit:hover { background: var(--sky-soft); color: var(--sky); }
+
+/* 시험 추가/수정 바텀시트 폼 */
+.exam-form { display: flex; flex-direction: column; gap: 14px; }
+.exam-form label { display: flex; flex-direction: column; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--text-muted); }
+.exam-form input {
+  width: 100%; box-sizing: border-box; min-width: 0;
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px 14px; font-size: 14px; font-weight: 600; color: var(--text);
+  background: var(--bg-soft);
+  height: 46px;
+}
+.exam-form-actions { display: flex; gap: 8px; margin-top: 2px; }
+.exam-form-actions .btn { flex: 1; }
+
+/* D-Day 카드 안, 다음 시험들을 보여주는 작은 리스트 */
+.dday-mini-list { display: flex; flex-direction: column; gap: 4px; margin-top: 2px; }
+.dday-mini-row {
+  display: flex; align-items: baseline; gap: 6px;
+  font-size: 11px; font-weight: 700; color: var(--text-muted);
+}
+.dday-mini-row .dday-mini-d { color: var(--ember); font-weight: 800; }
+
 /* ============================================================
    토스트
    ============================================================ */
@@ -1055,6 +1133,7 @@ h1, h2, h3, p { margin: 0; }
             </div>
             <div class="stat-value" id="stat-dday">D-0</div>
             <div class="stat-sub" id="stat-dday-sub">목표를 설정해보세요</div>
+            <div class="dday-mini-list" id="ddayMiniList"></div>
             <span class="stat-mascot"><img data-mascot="goal" alt="소공이" /></span>
           </div>
 
@@ -1243,14 +1322,18 @@ h1, h2, h3, p { margin: 0; }
       <!-- ---------- 설정 ---------- -->
       <section class="page" id="page-settings">
         <div class="card">
-          <div class="card-head"><h3>시험 / 목표</h3></div>
+          <div class="card-head">
+            <h3>시험 관리</h3>
+            <button class="link-btn" id="addExamBtn">＋ 시험 추가</button>
+          </div>
+          <div class="card-body">
+            <div class="exam-list" id="examList"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <div class="card-head"><h3>학습 목표</h3></div>
           <div class="card-body form-grid">
-            <label>시험 이름
-              <input type="text" id="setExamName" placeholder="예: 2급 자격증 시험" />
-            </label>
-            <label>시험 날짜
-              <input type="date" id="setExamDate" />
-            </label>
             <label>하루 목표 강의 수
               <input type="number" min="0" id="setGoalLectures" />
             </label>
@@ -1273,13 +1356,40 @@ h1, h2, h3, p { margin: 0; }
         <div class="card" style="margin-top:16px">
           <div class="card-head"><h3>데이터 관리</h3></div>
           <div class="card-body">
-            <p class="section-desc">모든 기록은 이 브라우저의 localStorage에 자동 저장돼요.</p>
-            <div class="btn-row">
-              <button class="btn" id="exportBtn">데이터 내보내기 (JSON)</button>
-              <button class="btn" id="importBtn">데이터 불러오기</button>
-              <button class="btn btn-danger" id="resetBtn">전체 초기화</button>
+            <div class="settings-list">
+              <button class="settings-row" id="exportBtn">
+                <span class="settings-row-main">
+                  <span class="settings-row-title">백업하자</span>
+                  <span class="settings-row-sub" id="lastBackupLabel">아직 백업한 적이 없어요</span>
+                </span>
+                <span class="settings-row-chevron">›</span>
+              </button>
+              <button class="settings-row" id="importBtn">
+                <span class="settings-row-main">
+                  <span class="settings-row-title">불러오자</span>
+                </span>
+                <span class="settings-row-chevron">›</span>
+              </button>
+              <button class="settings-row settings-row-danger" id="resetBtn">
+                <span class="settings-row-main">
+                  <span class="settings-row-title">지워버려</span>
+                </span>
+                <span class="settings-row-chevron">›</span>
+              </button>
+            </div>
+            <div class="backup-nudge" id="backupNudge" hidden>
+              <img data-mascot="point" alt="소공이" />
+              <span>백업한 지 7일이 지났어요.<br />한 번 백업해두면 안심할 수 있어요.</span>
             </div>
             <input type="file" id="importFile" accept="application/json" hidden />
+          </div>
+        </div>
+
+        <div class="app-version-footer">
+          <img data-mascot="greet" alt="소공이" />
+          <div class="app-version-text">
+            <div class="app-version-name">소공림 <span id="appVersion"></span></div>
+            <div class="app-version-date">Last Updated <span id="appVersionDate"></span></div>
           </div>
         </div>
       </section>
@@ -1370,7 +1480,7 @@ h1, h2, h3, p { margin: 0; }
     </div>
     <div class="modal-foot">
       <button class="btn" id="confirmCancel">취소</button>
-      <button class="btn btn-danger" id="confirmOk">삭제</button>
+      <button class="btn btn-danger-solid" id="confirmOk">삭제하기</button>
     </div>
   </div>
 </div>
@@ -1468,7 +1578,11 @@ function createSeedData() {
       examName: "나의 목표 시험",
       examDate: addDays(now, 60),
       createdAt: now,
+      lastBackupAt: null,
     },
+    exams: [
+      { id: uid("exam"), name: "나의 목표 시험", date: addDays(now, 60) },
+    ],
     settings: {
       dailyGoalLectures: 3,
       dailyGoalMinutes: 120,
@@ -1508,7 +1622,8 @@ function createEmptyData() {
   const now = todayStr();
   return {
     version: DATA_VERSION,
-    meta: { examName: "", examDate: "", createdAt: now },
+    meta: { examName: "", examDate: "", createdAt: now, lastBackupAt: null },
+    exams: [],
     settings: { dailyGoalLectures: 3, dailyGoalMinutes: 120, dark: false },
     subjects: [],
     todos: [],
@@ -1548,6 +1663,16 @@ function saveData(data) {
 function migrateData(data) {
   data.version = data.version || 1;
   data.meta = data.meta || { examName: "", examDate: "", createdAt: todayStr() };
+  if (data.meta.lastBackupAt === undefined) data.meta.lastBackupAt = null;
+  /* 예전엔 시험을 하나만 관리했습니다(meta.examName/examDate).
+     exams 배열이 없으면, 기존에 등록해둔 시험이 있는지 확인해서
+     시험 목록의 첫 번째 항목으로 자동 변환합니다. */
+  if (!data.exams) {
+    data.exams = [];
+    if (data.meta.examName || data.meta.examDate) {
+      data.exams.push({ id: uid("exam"), name: data.meta.examName || "시험", date: data.meta.examDate || "" });
+    }
+  }
   data.settings = Object.assign(
     { dailyGoalLectures: 3, dailyGoalMinutes: 120, dark: false },
     data.settings || {}
@@ -1623,6 +1748,11 @@ function getStudyDatesSet(data) {
   return new Set(data.studyLogs.map((l) => l.date));
 }
 /* 연속 공부일 계산 (오늘 또는 어제까지 이어졌는지 확인) */
+/* 시험 목록을 날짜순으로 정렬 (날짜 미입력은 맨 뒤로) */
+function getSortedExams(data) {
+  return [...(data.exams || [])].sort((a, b) => (a.date || "9999-99-99").localeCompare(b.date || "9999-99-99"));
+}
+
 function calcStreak(data) {
   const set = getStudyDatesSet(data);
   const today = todayStr();
@@ -2152,13 +2282,24 @@ function renderDashboard() {
   const minutesToday = logsToday.reduce((s, l) => s + (l.minutes || 0), 0);
   const streak = calcStreak(DATA);
 
-  // D-Day
+  // D-Day: 여러 시험 중 가장 가까운(오늘 이후) 시험을 메인으로, 나머지는 아래 작은 리스트로
   const ddayEl = document.getElementById("stat-dday");
   const ddaySub = document.getElementById("stat-dday-sub");
-  if (DATA.meta.examDate) {
-    const diff = daysBetween(today, DATA.meta.examDate);
-    ddayEl.textContent = diff === 0 ? "D-DAY" : (diff > 0 ? `D-${diff}` : `D+${-diff}`);
-    ddaySub.textContent = DATA.meta.examName || "목표 시험";
+  const miniList = document.getElementById("ddayMiniList");
+  const upcoming = getSortedExams(DATA).filter(ex => ex.date && ex.date >= today);
+  miniList.innerHTML = "";
+  if (upcoming.length > 0) {
+    const main = upcoming[0];
+    const diff = daysBetween(today, main.date);
+    ddayEl.textContent = diff === 0 ? "D-DAY" : `D-${diff}`;
+    ddaySub.textContent = main.name || "목표 시험";
+    upcoming.slice(1, 4).forEach((ex) => {
+      const d = daysBetween(today, ex.date);
+      const row = document.createElement("div");
+      row.className = "dday-mini-row";
+      row.innerHTML = `<span class="dday-mini-d">${d === 0 ? "D-DAY" : "D-" + d}</span><span>${escapeHtml(ex.name || "시험")}</span>`;
+      miniList.appendChild(row);
+    });
   } else {
     ddayEl.textContent = "미설정";
     ddaySub.textContent = "설정에서 시험일을 등록해보세요";
@@ -3049,17 +3190,15 @@ function confirmDeleteLog(log) {
    설정 페이지
    ============================================================ */
 function bindSettings() {
-  const nameEl = document.getElementById("setExamName");
-  const dateEl = document.getElementById("setExamDate");
   const goalLecEl = document.getElementById("setGoalLectures");
   const goalMinEl = document.getElementById("setGoalMinutes");
   const darkEl = document.getElementById("setDark");
 
-  nameEl.addEventListener("change", () => { DATA.meta.examName = nameEl.value; save(); renderDashboard(); });
-  dateEl.addEventListener("change", () => { DATA.meta.examDate = dateEl.value; save(); renderDashboard(); });
   goalLecEl.addEventListener("change", () => { DATA.settings.dailyGoalLectures = Number(goalLecEl.value)||0; save(); renderDashboard(); });
   goalMinEl.addEventListener("change", () => { DATA.settings.dailyGoalMinutes = Number(goalMinEl.value)||0; save(); renderDashboard(); });
   darkEl.addEventListener("change", () => { DATA.settings.dark = darkEl.checked; save(); applyDarkMode(); });
+
+  document.getElementById("addExamBtn").addEventListener("click", () => openExamSheet(null));
 
   document.getElementById("exportBtn").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: "application/json" });
@@ -3067,7 +3206,10 @@ function bindSettings() {
     const a = document.createElement("a");
     a.href = url; a.download = `sogongrim_backup_${todayStr()}.json`;
     a.click(); URL.revokeObjectURL(url);
-    toast("내보내기가 완료됐어요");
+    DATA.meta.lastBackupAt = new Date().toISOString();
+    save();
+    renderBackupStatus();
+    toast("백업을 완료했어요 🔥");
   });
   document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
   document.getElementById("importFile").addEventListener("change", (e) => {
@@ -3078,29 +3220,131 @@ function bindSettings() {
       try {
         const parsed = JSON.parse(reader.result);
         DATA = migrateData(parsed);
-        save(); renderAll(); applyDarkMode();
-        toast("데이터를 불러왔어요");
+        save(); renderAll(); applyDarkMode(); renderBackupStatus();
+        toast("백업 데이터를 성공적으로 불러왔습니다.");
       } catch (err) {
         toast("올바른 소공림 백업 파일이 아니에요.");
       }
     };
     reader.readAsText(file);
+    e.target.value = "";
   });
   document.getElementById("resetBtn").addEventListener("click", async () => {
-    const ok = await confirmModal("정말 모든 데이터를 초기화할까요? 지금까지의 기록이 모두 지워지고 빈 상태로 시작해요. 이 작업은 되돌릴 수 없어요.");
+    const ok = await confirmModal("모든 공부 기록을 삭제할까요?\n이 작업은 되돌릴 수 없습니다.");
     if (!ok) return;
     DATA = createEmptyData();
-    save(); renderAll(); applyDarkMode();
+    save(); renderAll(); applyDarkMode(); renderBackupStatus();
     toast("깨끗하게 초기화했어요 👨‍🚒");
   });
 }
 
+/* 마지막 백업 시각 표시 + 7일 이상 지났으면 살짝 안내 */
+function formatBackupTime(iso) {
+  const d = new Date(iso);
+  const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
+  let h = d.getHours();
+  const ampm = h < 12 ? "오전" : "오후";
+  h = h % 12; if (h === 0) h = 12;
+  const min = String(d.getMinutes()).padStart(2, "0");
+  return `${y}.${m}.${day} ${ampm} ${h}:${min}`;
+}
+function renderBackupStatus() {
+  const label = document.getElementById("lastBackupLabel");
+  const nudge = document.getElementById("backupNudge");
+  const last = DATA.meta.lastBackupAt;
+  if (!last) {
+    label.textContent = "아직 백업한 적이 없어요";
+    nudge.hidden = false;
+  } else {
+    label.textContent = `마지막 백업 · ${formatBackupTime(last)}`;
+    const daysSince = (Date.now() - new Date(last).getTime()) / 86400000;
+    nudge.hidden = daysSince < 7;
+  }
+}
+
+/* ---------------- 버전 정보: 업데이트할 땐 이 두 값만 바꾸면 됩니다 ---------------- */
+const APP_VERSION = "1.0.3";
+const APP_VERSION_DATE = "2026-07-08";
+
 function renderSettingsForm() {
-  document.getElementById("setExamName").value = DATA.meta.examName || "";
-  document.getElementById("setExamDate").value = DATA.meta.examDate || "";
   document.getElementById("setGoalLectures").value = DATA.settings.dailyGoalLectures;
   document.getElementById("setGoalMinutes").value = DATA.settings.dailyGoalMinutes;
   document.getElementById("setDark").checked = !!DATA.settings.dark;
+  document.getElementById("appVersion").textContent = `Version ${APP_VERSION}`;
+  document.getElementById("appVersionDate").textContent = APP_VERSION_DATE;
+  renderBackupStatus();
+  renderExamList();
+}
+
+/* ---------------- 시험 관리: 목록 + 추가/수정/삭제 ---------------- */
+function renderExamList() {
+  const wrap = document.getElementById("examList");
+  wrap.innerHTML = "";
+  const exams = getSortedExams(DATA);
+  if (exams.length === 0) {
+    wrap.innerHTML = emptyMascot("아직 등록한 시험이 없어요. 첫 시험을 추가해볼까요?", "goal");
+    return;
+  }
+  const today = todayStr();
+  exams.forEach((ex) => {
+    const row = document.createElement("div");
+    row.className = "exam-row";
+    const d = ex.date ? daysBetween(today, ex.date) : null;
+    const ddayLabel = d === null ? "" : d === 0 ? "D-DAY" : d > 0 ? `D-${d}` : `D+${-d}`;
+    row.innerHTML = `
+      <div class="exam-row-main">
+        <div class="exam-row-name"><span class="exam-row-dday">${ddayLabel}</span>${escapeHtml(ex.name || "시험")}</div>
+        <div class="exam-row-meta">${ex.date ? ex.date.replaceAll("-", ".") : "날짜 미정"}</div>
+      </div>
+      <button class="exam-row-edit" aria-label="수정">✏️</button>
+    `;
+    row.querySelector(".exam-row-edit").addEventListener("click", () => openExamSheet(ex));
+    wrap.appendChild(row);
+  });
+}
+
+function openExamSheet(exam) {
+  const isEdit = !!exam;
+  const body = document.createElement("div");
+  body.className = "exam-form";
+  body.innerHTML = `
+    <label>시험 이름
+      <input type="text" id="examFormName" placeholder="예: 소방공무원 필기" value="${isEdit ? escapeHtml(exam.name || "") : ""}" />
+    </label>
+    <label>시험 날짜
+      <input type="date" id="examFormDate" value="${isEdit ? exam.date || "" : ""}" />
+    </label>
+    <div class="exam-form-actions">
+      ${isEdit ? '<button class="btn btn-danger-solid" id="examFormDelete">삭제</button>' : ""}
+      <button class="btn btn-primary" id="examFormSave">저장</button>
+    </div>
+  `;
+  sheetShow(isEdit ? "시험 수정" : "시험 추가", body);
+  document.getElementById("sheetBack").hidden = true;
+  bindSheetChrome(() => sheetHide());
+
+  body.querySelector("#examFormSave").onclick = () => {
+    const name = body.querySelector("#examFormName").value.trim();
+    const date = body.querySelector("#examFormDate").value;
+    if (!name) { toast("시험 이름을 입력해주세요"); return; }
+    if (isEdit) {
+      exam.name = name; exam.date = date;
+    } else {
+      DATA.exams.push({ id: uid("exam"), name, date });
+    }
+    save(); sheetHide(); renderExamList(); renderDashboard();
+    toast(isEdit ? "시험 정보를 수정했어요" : "시험을 추가했어요");
+  };
+  if (isEdit) {
+    body.querySelector("#examFormDelete").onclick = async () => {
+      sheetHide();
+      const ok = await confirmModal(`'${exam.name}' 시험을 삭제할까요?`);
+      if (!ok) return;
+      DATA.exams = DATA.exams.filter(e => e.id !== exam.id);
+      save(); renderExamList(); renderDashboard();
+      toast("시험을 삭제했어요");
+    };
+  }
 }
 
 /* ============================================================
