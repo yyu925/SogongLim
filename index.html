@@ -902,6 +902,15 @@ h1, h2, h3, p { margin: 0; }
 }
 
 /* 공부 시간 입력 */
+.picker-date-row { margin-bottom: 12px; }
+.picker-date-row label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+.picker-date-row input {
+  width: 100%; box-sizing: border-box; min-width: 0;
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 11px 13px; font-size: 13.5px; font-weight: 700; color: var(--text);
+  background: var(--bg-soft);
+  height: 44px;
+}
 .picker-minutes-quick { display: flex; gap: 8px; margin-bottom: 14px; }
 .btn-quick-min {
   flex: 1;
@@ -1999,11 +2008,23 @@ function pickColor(current) {
 }
 
 /* 공부 시간(분) 입력: +10/+30/+60 또는 직접입력. allowSkip이면 닫아도 0분으로 기록됨 */
-function pickMinutes(title, { allowSkip = true } = {}) {
+/* 공부 시간(분)과 "공부한 날짜"를 함께 입력받는다.
+   자정을 넘겨 입력해도 실제 공부한 날짜를 고를 수 있도록 날짜 필드를 기본으로 보여준다.
+   결과는 항상 { minutes, date } 형태로 resolve된다 (닫기/건너뛰기가 아니면 null). */
+function pickMinutes(title, { allowSkip = true, initialDate } = {}) {
   return new Promise((resolve) => {
     let done = false;
-    const finish = (val) => { if (done) return; done = true; sheetHide(); resolve(val); };
+    const getDate = () => dateInput.value || todayStr();
+    const finish = (minutes) => { if (done) return; done = true; sheetHide(); resolve({ minutes, date: getDate() }); };
+    const dismiss = () => { if (done) return; done = true; sheetHide(); resolve(allowSkip ? { minutes: 0, date: getDate() } : null); };
+
     const body = document.createElement("div");
+
+    const dateRow = document.createElement("div");
+    dateRow.className = "picker-date-row";
+    dateRow.innerHTML = `<label>공부한 날짜<input type="date" id="pickerDateInput" value="${initialDate || todayStr()}" max="${todayStr()}" /></label>`;
+    body.appendChild(dateRow);
+    const dateInput = dateRow.querySelector("input");
 
     const quick = document.createElement("div");
     quick.className = "picker-minutes-quick";
@@ -2036,7 +2057,7 @@ function pickMinutes(title, { allowSkip = true } = {}) {
     }
 
     sheetShow(title, body);
-    bindSheetChrome(() => finish(allowSkip ? 0 : null));
+    bindSheetChrome(dismiss);
   });
 }
 
@@ -2105,13 +2126,19 @@ function openStudyTimeWizard() {
 
   function showMinutesStep() {
     const body = document.createElement("div");
+    const dateRow = document.createElement("div");
+    dateRow.className = "picker-date-row";
+    dateRow.innerHTML = `<label>공부한 날짜<input type="date" id="wizardDateInput" value="${todayStr()}" max="${todayStr()}" /></label>`;
+    body.appendChild(dateRow);
+    const dateInput = dateRow.querySelector("input");
+
     const quick = document.createElement("div");
     quick.className = "picker-minutes-quick";
     [10, 30, 60].forEach((m) => {
       const b = document.createElement("button");
       b.className = "btn-quick-min";
       b.textContent = `+${m}분`;
-      b.onclick = () => commit(m);
+      b.onclick = () => commit(m, dateInput.value || todayStr());
       quick.appendChild(b);
     });
     body.appendChild(quick);
@@ -2122,7 +2149,7 @@ function openStudyTimeWizard() {
     customRow.querySelector("button").onclick = () => {
       const v = Math.max(0, Math.round(Number(customRow.querySelector("input").value) || 0));
       if (!v) { toast("숫자를 입력해주세요"); return; }
-      commit(v);
+      commit(v, dateInput.value || todayStr());
     };
 
     const backFn = state.lec ? showLectureStep
@@ -2134,16 +2161,18 @@ function openStudyTimeWizard() {
     bindSheetChrome(() => sheetHide());
   }
 
-  function commit(minutes) {
+  function commit(minutes, dateStr = todayStr()) {
     const { subj, sess, lec } = state;
     logStudy(DATA, {
       lectureId: lec ? lec.id : null,
       subjectId: subj ? subj.id : null,
+      date: dateStr,
       minutes,
       type: lec ? "manual" : "other",
       kind: lec ? "lecture" : "other",
       color: subj ? subj.color : "var(--sky)",
       subjectName: subj ? subj.name : "기타 공부",
+      subjectIcon: subj ? subj.icon : "✏️",
       sessionName: sess ? sess.name : "",
       lectureName: lec ? lec.name : "",
       label: subj ? `${subj.name}${sess ? " · " + sess.name : ""}${lec ? " " + lec.name : ""}` : "기타 공부",
@@ -2422,22 +2451,41 @@ function renderRecentList() {
     return;
   }
   logs.forEach((log) => {
-    const row = document.createElement("div");
-    row.className = "recent-row";
-    row.innerHTML = studyLogRowHtml(log);
-    wrap.appendChild(row);
+    wrap.appendChild(buildDeletableLogRow(log));
   });
+}
+
+/* studyLogs 한 건을 "삭제 가능한 한 줄"로 만들어준다.
+   대시보드 최근 공부한 강의 / 공부 달력 날짜별 기록에서 함께 사용한다. */
+function buildDeletableLogRow(log) {
+  const row = document.createElement("div");
+  row.className = "recent-row";
+  row.innerHTML = studyLogRowHtml(log) + `<button class="log-del-btn" aria-label="삭제">🗑️</button>`;
+  row.querySelector(".log-del-btn").addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const ok = await confirmDeleteLog(log);
+    if (!ok) return;
+    DATA.studyLogs = DATA.studyLogs.filter(l => l.id !== log.id);
+    revertLectureStateForLog(log);
+    save();
+    renderDashboard(); renderCalendarPage(); renderStats(); renderSubjects(); renderReview();
+    toast("기록을 삭제했어요");
+  });
+  return row;
 }
 
 /* studyLogs 한 건을 "아이콘 · 과목/강의 · 부제 · 시간" 형태로 그려주는 공용 헬퍼.
    과거 형식(label만 있던 기록)도 최대한 자연스럽게 보이도록 처리한다. */
 function studyLogRowHtml(log) {
   const kind = log.kind || (log.type === "review" ? "review" : log.type === "lecture-complete" ? "lecture" : (log.lectureId ? "lecture" : "other"));
-  const icon = kind === "review" ? "🔁" : kind === "lecture" ? "📚" : "✏️";
+  // 과목에서 고른 아이콘이 있으면 그걸 그대로 보여줘서 "과목별 진행률" 등 다른 화면과 아이콘이 이어지도록 한다.
+  // 옛 기록처럼 과목 아이콘이 없으면 종류별 기본 아이콘으로 대체한다.
+  const icon = log.subjectIcon || (kind === "review" ? "🔁" : kind === "lecture" ? "📚" : "✏️");
+  const iconBg = (log.color && log.color.startsWith("#")) ? hexSoft(log.color) : "var(--bg-soft)";
   const title = log.subjectName || (log.label ? log.label.split(" · ")[0] : "기타 공부");
   let subtitle = "";
   if (kind === "review") {
-    subtitle = log.reviewRound ? `${log.reviewRound}회독` : "복습";
+    subtitle = log.reviewRound ? `🔁 ${log.reviewRound}회독` : "🔁 복습";
   } else if (log.sessionName || log.lectureName) {
     subtitle = [log.sessionName, log.lectureName].filter(Boolean).join(" ");
   } else if (log.label && log.label.includes(" · ")) {
@@ -2445,7 +2493,7 @@ function studyLogRowHtml(log) {
   }
   const timeLabel = log.minutes > 0 ? `${log.minutes}분` : "완료";
   return `
-    <span class="recent-ico">${icon}</span>
+    <span class="recent-ico" style="background:${iconBg}">${icon}</span>
     <span class="recent-text">
       <span class="recent-title">${escapeHtml(title)}</span>
       ${subtitle ? `<span class="recent-sub">${escapeHtml(subtitle)}</span>` : ""}
@@ -2655,14 +2703,14 @@ function renderSessionBlock(subj, sess) {
 /* 강의 완료 상태를 studyLogs와 항상 동기화해서 바꿔주는 헬퍼.
    체크 해제 시에는 그 강의의 완료 기록도 함께 지워서
    공부 달력·오늘 통계가 어긋나지 않도록 한다. */
-function setLectureCompleted(lec, subj, sess, completed, minutes = 0) {
+function setLectureCompleted(lec, subj, sess, completed, minutes = 0, dateStr = todayStr()) {
   if (lec.completed === completed) return;
   lec.completed = completed;
   if (completed) {
-    lec.completedDate = lec.completedDate || todayStr();
+    lec.completedDate = dateStr;
     logStudy(DATA, {
-      lectureId: lec.id, subjectId: subj.id, minutes, type: "lecture-complete", kind: "lecture",
-      color: subj.color, subjectName: subj.name, sessionName: sess ? sess.name : "", lectureName: lec.name,
+      lectureId: lec.id, subjectId: subj.id, minutes, type: "lecture-complete", kind: "lecture", date: dateStr,
+      color: subj.color, subjectName: subj.name, subjectIcon: subj.icon, sessionName: sess ? sess.name : "", lectureName: lec.name,
       label: `${subj.name} · ${lec.name}`,
     });
   } else {
@@ -2674,15 +2722,15 @@ function setLectureCompleted(lec, subj, sess, completed, minutes = 0) {
 /* 복습 회차 수를 studyLogs와 항상 동기화해서 바꿔주는 헬퍼.
    회차를 늘리면 그만큼 복습 기록을 추가하고(마지막 회차에만 공부시간을 붙임),
    줄이면 해당 회차의 기록을 지워서 달력/통계가 실제 체크 상태와 어긋나지 않도록 한다. */
-function setReviewCount(lec, subj, sess, targetCount, minutesForNew = 0) {
+function setReviewCount(lec, subj, sess, targetCount, minutesForNew = 0, dateStr = todayStr()) {
   targetCount = Math.max(0, Math.min(10, targetCount));
   if (targetCount > lec.reviews.length) {
     for (let n = lec.reviews.length + 1; n <= targetCount; n++) {
-      lec.reviews.push({ date: todayStr() });
+      lec.reviews.push({ date: dateStr });
       logStudy(DATA, {
-        lectureId: lec.id, subjectId: subj.id, round: n, type: "review", kind: "review", reviewRound: n,
+        lectureId: lec.id, subjectId: subj.id, round: n, type: "review", kind: "review", reviewRound: n, date: dateStr,
         minutes: n === targetCount ? minutesForNew : 0,
-        color: subj.color, subjectName: subj.name, sessionName: sess ? sess.name : "", lectureName: lec.name,
+        color: subj.color, subjectName: subj.name, subjectIcon: subj.icon, sessionName: sess ? sess.name : "", lectureName: lec.name,
         label: `${subj.name} · ${n}회독`,
       });
     }
@@ -2705,8 +2753,8 @@ function renderLectureRow(subj, sess, lec) {
   row.querySelector(".lecture-check").addEventListener("change", async (e) => {
     const checked = e.target.checked;
     if (checked) {
-      const minutes = await pickMinutes("이 강의 공부 시간을 기록할까요?", { allowSkip: true });
-      setLectureCompleted(lec, subj, sess, true, minutes || 0);
+      const result = await pickMinutes("이 강의 공부 시간을 기록할까요?", { allowSkip: true });
+      setLectureCompleted(lec, subj, sess, true, result ? result.minutes : 0, result ? result.date : todayStr());
     } else {
       setLectureCompleted(lec, subj, sess, false);
     }
@@ -2744,8 +2792,8 @@ function bindModal() {
     const lec = activeLectureRef.lec, subj = activeLectureRef.subj, sess = activeLectureRef.sess;
     const checked = e.target.checked;
     if (checked) {
-      const minutes = await pickMinutes("이 강의 공부 시간을 기록할까요?", { allowSkip: true });
-      setLectureCompleted(lec, subj, sess, true, minutes || 0);
+      const result = await pickMinutes("이 강의 공부 시간을 기록할까요?", { allowSkip: true });
+      setLectureCompleted(lec, subj, sess, true, result ? result.minutes : 0, result ? result.date : todayStr());
     } else {
       setLectureCompleted(lec, subj, sess, false);
     }
@@ -2763,8 +2811,8 @@ function bindModal() {
     btn.addEventListener("click", () => logLectureMinutes(Number(btn.dataset.min)));
   });
   document.getElementById("lecModalMinutesCustom").addEventListener("click", async () => {
-    const minutes = await pickMinutes("공부 시간 입력", { allowSkip: false });
-    if (minutes) logLectureMinutes(minutes);
+    const result = await pickMinutes("공부 시간 입력", { allowSkip: false });
+    if (result && result.minutes) logLectureMinutes(result.minutes, result.date);
   });
   document.getElementById("lecModalDelete").addEventListener("click", async () => {
     const ok = await confirmModal("이 강의를 삭제할까요?");
@@ -2807,11 +2855,11 @@ function renderModalStudyTime() {
   document.getElementById("lecModalMinutesTotal").textContent =
     total > 0 ? `· 총 ${total >= 60 ? Math.floor(total/60) + "시간 " + (total%60) + "분" : total + "분"}` : "";
 }
-function logLectureMinutes(minutes) {
+function logLectureMinutes(minutes, dateStr = todayStr()) {
   const { lec, subj, sess } = activeLectureRef;
   logStudy(DATA, {
-    lectureId: lec.id, subjectId: subj.id, minutes, type: "manual", kind: "lecture",
-    color: subj.color, subjectName: subj.name, sessionName: sess.name, lectureName: lec.name,
+    lectureId: lec.id, subjectId: subj.id, minutes, type: "manual", kind: "lecture", date: dateStr,
+    color: subj.color, subjectName: subj.name, subjectIcon: subj.icon, sessionName: sess.name, lectureName: lec.name,
     label: `${subj.name} · ${sess.name} ${lec.name}`,
   });
   save(); renderModalStudyTime(); renderDashboard(); renderCalendarPage(); renderStats();
@@ -2831,11 +2879,13 @@ function renderModalReviews() {
       const subj = activeLectureRef.subj, sess = activeLectureRef.sess;
       const isChecking = lec.reviews.length < i;
       const targetCount = isChecking ? i : i - 1;
-      let minutes = 0;
+      let minutes = 0, dateStr = todayStr();
       if (isChecking) {
-        minutes = await pickMinutes(`${i}회독 공부 시간`, { allowSkip: true }) || 0;
+        const result = await pickMinutes(`${i}회독 공부 시간`, { allowSkip: true });
+        minutes = result ? result.minutes : 0;
+        dateStr = result ? result.date : todayStr();
       }
-      setReviewCount(lec, subj, sess, targetCount, minutes);
+      setReviewCount(lec, subj, sess, targetCount, minutes, dateStr);
       save(); renderModalReviews(); renderDashboard(); renderCalendarPage(); renderStats(); renderModalStudyTime();
     });
     wrap.appendChild(dot);
@@ -2886,8 +2936,8 @@ function renderReview() {
         <button class="review-check-btn">복습 완료</button>
       `;
       row.querySelector(".review-check-btn").addEventListener("click", async () => {
-        const minutes = await pickMinutes(`${lec.reviews.length + 1}회독 공부 시간`, { allowSkip: true });
-        setReviewCount(lec, subj, sess, lec.reviews.length + 1, minutes || 0);
+        const result = await pickMinutes(`${lec.reviews.length + 1}회독 공부 시간`, { allowSkip: true });
+        setReviewCount(lec, subj, sess, lec.reviews.length + 1, result ? result.minutes : 0, result ? result.date : todayStr());
         save(); renderReview(); renderDashboard(); renderCalendarPage(); renderStats();
         toast("복습을 기록했어요 🔁");
       });
@@ -2977,10 +3027,7 @@ function renderCalDayDetail() {
     return;
   }
   logs.forEach((log) => {
-    const row = document.createElement("div");
-    row.className = "recent-row";
-    row.innerHTML = studyLogRowHtml(log);
-    wrap.appendChild(row);
+    wrap.appendChild(buildDeletableLogRow(log));
   });
 }
 
@@ -3159,7 +3206,7 @@ function confirmDeleteLog(log) {
     let done = false;
     const finish = (val) => { if (done) return; done = true; sheetHide(); resolve(val); };
     const kind = log.kind || (log.type === "review" ? "review" : "lecture");
-    const icon = kind === "review" ? "🔁" : kind === "lecture" ? "📚" : "✏️";
+    const icon = log.subjectIcon || (kind === "review" ? "🔁" : kind === "lecture" ? "📚" : "✏️");
     const title = log.subjectName || "기타 공부";
     const subtitle = kind === "review"
       ? (log.reviewRound ? `${log.reviewRound}회독` : "복습")
@@ -3278,6 +3325,13 @@ function renderBackupStatus() {
    APP_VERSION_DATE 두 값만 바꿔주세요.
    기준: 큰 기능 추가 = Minor(1.X.0), 작은 개선/버그수정 = Patch(1.0.X)
 
+   v1.1.2 (2026-07-08)
+   - 공부 시간 기록 시 "공부한 날짜"를 직접 선택 가능하도록 개선 (자정 이후 입력해도 실제 공부한 날짜로 기록)
+   - 대시보드 "최근 공부한 강의"·공부 달력 날짜별 기록에 삭제 버튼 추가
+
+   v1.1.1 (2026-07-08)
+   - 최근 공부한 강의/공부 달력/기록 삭제 목록의 아이콘을 과목에서 고른 아이콘과 연동
+
    v1.1.0 (2026-07-08)
    - 시험 여러 개 등록 기능 추가 (설정 > 시험 관리, 대시보드 D-Day 다중 표시)
    - 설정 화면 데이터 관리 UI 개편 (백업하자/불러오자/지워버려, 마지막 백업 시각, 7일 경과 안내)
@@ -3291,7 +3345,7 @@ function renderBackupStatus() {
    v1.0.3 이전
    - 초기 대시보드/과목관리/복습관리/공부달력/즐겨찾기/통계/설정 기본 구조
    ============================================================ */
-const APP_VERSION = "1.1.0";
+const APP_VERSION = "1.1.2";
 const APP_VERSION_DATE = "2026-07-08";
 
 function renderSettingsForm() {
