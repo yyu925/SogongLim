@@ -529,10 +529,12 @@ h1, h2, h3, p { margin: 0; }
   font-size: 11.5px;
   font-weight: 600;
   color: var(--text-muted);
+  cursor: pointer;
 }
+.mini-cal-day:hover { background: var(--sky-soft); color: var(--sky); }
 .mini-cal-day.has-log { background: var(--ember-soft); color: var(--ember); }
 .mini-cal-day.is-today { outline: 1.5px solid var(--ember); }
-.mini-cal-day.empty { visibility: hidden; }
+.mini-cal-day.empty { visibility: hidden; cursor: default; }
 
 /* ============================================================
    과목 관리 페이지
@@ -596,6 +598,70 @@ h1, h2, h3, p { margin: 0; }
   padding: 7px 12px; font-size: 12px; font-weight: 700; color: var(--text-muted);
 }
 .add-row button:hover { color: var(--sky); }
+
+/* ---------------- 과목관리: 과목 목록 화면 ---------------- */
+.session-rows { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.session-row-v2 {
+  width: 100%;
+  display: flex; align-items: center; gap: 8px;
+  border: none; background: var(--bg-soft);
+  border-radius: 12px; padding: 12px 13px;
+  text-align: left;
+}
+.session-row-v2:hover { background: var(--sky-soft); }
+.session-row-v2-name { flex: 1; font-size: 13px; font-weight: 700; color: var(--text); }
+.session-row-v2-meta { font-size: 11.5px; font-weight: 700; color: var(--text-muted); }
+.session-row-v2-chevron { font-size: 15px; color: var(--text-faint); }
+
+.add-inline-btn {
+  width: 100%; margin-top: 10px;
+  border: 1px dashed var(--border); background: none;
+  border-radius: 12px; padding: 10px;
+  font-size: 12.5px; font-weight: 700; color: var(--text-muted);
+}
+.add-inline-btn:hover { background: var(--bg-soft); color: var(--sky); border-color: var(--sky); }
+
+/* ---------------- 과목관리: 세션 상세(강의 목록) 화면 ---------------- */
+.session-detail-back-row { margin-bottom: 12px; }
+.back-btn {
+  border: none; background: none;
+  font-size: 13.5px; font-weight: 700; color: var(--text-muted);
+  padding: 6px 2px;
+}
+.back-btn:hover { color: var(--sky); }
+.session-detail-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 14px;
+}
+.session-detail-name { font-size: 16px; font-weight: 800; }
+.session-detail-meta { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-top: 2px; }
+
+/* ---------------- 강의 일괄 추가 바텀시트 ---------------- */
+.lecture-add-sheet .lecture-add-pane { display: flex; flex-direction: column; gap: 12px; }
+.lecture-add-sheet label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+.lecture-add-sheet input, .lecture-add-sheet textarea {
+  width: 100%; box-sizing: border-box; min-width: 0;
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 11px 13px; font-size: 13.5px; font-weight: 600; color: var(--text);
+  background: var(--bg-soft); font-family: inherit;
+}
+.lecture-add-sheet textarea { resize: vertical; line-height: 1.6; }
+.lecture-add-subpane { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+.range-row { display: flex; gap: 10px; }
+.range-row label { flex: 1; }
+
+.seg-tabs {
+  display: flex; gap: 4px;
+  background: var(--bg-soft); border-radius: 12px; padding: 4px;
+  margin-bottom: 16px;
+}
+.seg-tabs-sub { margin-bottom: 14px; }
+.seg-tab {
+  flex: 1; border: none; background: none;
+  padding: 9px 6px; border-radius: 9px;
+  font-size: 12.5px; font-weight: 700; color: var(--text-muted);
+}
+.seg-tab.is-active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-card); }
 
 /* ============================================================
    버튼 / 폼 공통
@@ -1220,7 +1286,11 @@ h1, h2, h3, p { margin: 0; }
         <div class="bottom-grid">
           <div class="card">
             <div class="card-head">
-              <h3>공부 달력</h3>
+              <h3 id="miniCalTitle">공부 달력</h3>
+              <div class="cal-nav">
+                <button class="icon-btn" id="miniCalPrev">‹</button>
+                <button class="icon-btn" id="miniCalNext">›</button>
+              </div>
             </div>
             <div class="card-body" id="miniCalendar"></div>
           </div>
@@ -1238,7 +1308,7 @@ h1, h2, h3, p { margin: 0; }
 
       <!-- ---------- 과목 관리 ---------- -->
       <section class="page" id="page-subjects">
-        <div class="section-head">
+        <div class="section-head" id="subjectsHeader">
           <p class="section-desc">과목 → 세션 → 강의 순서로 정리해요.</p>
           <button class="btn btn-primary" id="addSubjectBtn">＋ 과목 추가</button>
         </div>
@@ -2311,6 +2381,15 @@ function bindDashboard() {
     e.stopPropagation();
     openStudyTimeWizard();
   });
+
+  document.getElementById("miniCalPrev").addEventListener("click", () => {
+    calState.month--; if (calState.month < 0) { calState.month = 11; calState.year--; }
+    renderMiniCalendar();
+  });
+  document.getElementById("miniCalNext").addEventListener("click", () => {
+    calState.month++; if (calState.month > 11) { calState.month = 0; calState.year++; }
+    renderMiniCalendar();
+  });
 }
 
 function renderDashboard() {
@@ -2526,8 +2605,8 @@ function renderRoundList() {
 
 function renderMiniCalendar() {
   const wrap = document.getElementById("miniCalendar");
-  const now = new Date();
-  const y = now.getFullYear(), m = now.getMonth();
+  const { year: y, month: m } = calState;
+  document.getElementById("miniCalTitle").textContent = `${y}년 ${m + 1}월`;
   const first = new Date(y, m, 1);
   const startDow = first.getDay();
   const daysInMonth = new Date(y, m + 1, 0).getDate();
@@ -2542,10 +2621,19 @@ function renderMiniCalendar() {
     const cls = ["mini-cal-day"];
     if (logDates.has(ds)) cls.push("has-log");
     if (ds === today) cls.push("is-today");
-    html += `<div class="${cls.join(" ")}">${d}</div>`;
+    html += `<div class="${cls.join(" ")}" data-date="${ds}">${d}</div>`;
   }
   html += `</div>`;
   wrap.innerHTML = html;
+
+  // 날짜를 누르면 공부 달력 탭으로 이동해서 그 날짜가 바로 선택된 상태로 보여준다.
+  wrap.querySelectorAll("[data-date]").forEach((el) => {
+    el.addEventListener("click", () => {
+      calState.selectedDate = el.dataset.date;
+      goToPage("calendar");
+      closeSidebar();
+    });
+  });
 }
 
 function renderFavList(targetId, limit) {
@@ -2587,9 +2675,29 @@ function bindSubjects() {
   });
 }
 
+/* 과목관리 화면 상태: 기본은 과목 목록, 세션을 클릭하면 그 세션의 강의 목록으로 들어간다.
+   (과목 → 세션 → 강의를 한 화면에 다 펼쳐두면 강의가 많아질수록 화면이 끝없이 길어지는 문제를 해결) */
+let subjectView = { subjectId: null, sessionId: null };
+
 function renderSubjects() {
   const wrap = document.getElementById("subjectTree");
+  const header = document.getElementById("subjectsHeader");
   wrap.innerHTML = "";
+
+  const subj = subjectView.subjectId ? DATA.subjects.find(s => s.id === subjectView.subjectId) : null;
+  const sess = subj && subjectView.sessionId ? subj.sessions.find(s => s.id === subjectView.sessionId) : null;
+
+  if (subj && sess) {
+    header.style.display = "none";
+    renderSessionDetailView(wrap, subj, sess);
+    return;
+  }
+  if (subjectView.subjectId || subjectView.sessionId) subjectView = { subjectId: null, sessionId: null };
+  header.style.display = "";
+  renderSubjectListView(wrap);
+}
+
+function renderSubjectListView(wrap) {
   if (DATA.subjects.length === 0) {
     wrap.innerHTML = `<div class="card">${emptyMascot("아직 과목이 없어요. 첫 과목을 추가해볼까요?", "study")}</div>`;
     return;
@@ -2597,6 +2705,7 @@ function renderSubjects() {
   DATA.subjects.forEach((subj) => {
     const all = subj.sessions.flatMap(s => s.lectures);
     const done = all.filter(l => l.completed).length;
+    const pct = all.length ? Math.round((done / all.length) * 100) : 0;
 
     const card = document.createElement("div");
     card.className = "card subject-card";
@@ -2605,21 +2714,35 @@ function renderSubjects() {
         <div class="subject-icon" style="background:${hexSoft(subj.color)}">${subj.icon}</div>
         <div class="subject-name-wrap">
           <div class="subject-name">${escapeHtml(subj.name)}</div>
-          <div class="subject-meta">${all.length}강 중 ${done}강 완료</div>
+          <div class="subject-meta">${done} / ${all.length}강 · ${pct}%</div>
+          <div class="bar-track" style="margin-top:6px"><div class="bar-fill" style="width:${pct}%; background:${subj.color}"></div></div>
         </div>
-        <div class="subject-actions">
-          <button class="icon-btn" data-act="menu" title="더보기">⋯</button>
-        </div>
+        <button class="icon-btn" data-act="menu" title="더보기">⋯</button>
       </div>
-      <div class="sessions"></div>
-      <div class="add-row">
-        <input type="text" placeholder="새 세션 이름 (예: 기본이론)" data-role="new-session" />
-        <button data-act="add-session">추가</button>
-      </div>
+      <div class="session-rows"></div>
+      <button class="add-inline-btn" data-act="add-session">＋ 세션 추가</button>
     `;
 
-    const sessionsWrap = card.querySelector(".sessions");
-    subj.sessions.forEach((sess) => sessionsWrap.appendChild(renderSessionBlock(subj, sess)));
+    const sessionsWrap = card.querySelector(".session-rows");
+    if (subj.sessions.length === 0) {
+      sessionsWrap.innerHTML = `<div class="empty-note">세션을 추가해서 강의를 정리해보세요.</div>`;
+    } else {
+      subj.sessions.forEach((sess) => {
+        const sdone = sess.lectures.filter(l => l.completed).length;
+        const row = document.createElement("button");
+        row.className = "session-row-v2";
+        row.innerHTML = `
+          <span class="session-row-v2-name">${escapeHtml(sess.name)}</span>
+          <span class="session-row-v2-meta">${sdone} / ${sess.lectures.length}</span>
+          <span class="session-row-v2-chevron">›</span>
+        `;
+        row.addEventListener("click", () => {
+          subjectView = { subjectId: subj.id, sessionId: sess.id };
+          renderSubjects();
+        });
+        sessionsWrap.appendChild(row);
+      });
+    }
 
     card.querySelector('[data-act="menu"]').addEventListener("click", async () => {
       const choice = await actionSheet([
@@ -2647,11 +2770,10 @@ function renderSubjects() {
         save(); renderSubjects(); renderDashboard();
       }
     });
-    card.querySelector('[data-act="add-session"]').addEventListener("click", () => {
-      const input = card.querySelector('[data-role="new-session"]');
-      if (!input.value.trim()) return;
-      subj.sessions.push({ id: uid("sess"), name: input.value.trim(), order: subj.sessions.length, collapsed: false, lectures: [] });
-      input.value = "";
+    card.querySelector('[data-act="add-session"]').addEventListener("click", async () => {
+      const name = await promptModal("새 세션 이름 (예: 기본이론)");
+      if (!name) return;
+      subj.sessions.push({ id: uid("sess"), name, order: subj.sessions.length, collapsed: false, lectures: [] });
       save(); renderSubjects();
     });
 
@@ -2659,45 +2781,143 @@ function renderSubjects() {
   });
 }
 
-function renderSessionBlock(subj, sess) {
-  const block = document.createElement("div");
-  block.className = "session-block";
-  block.innerHTML = `
-    <div class="session-head">
-      <button class="session-toggle" data-act="toggle">${sess.collapsed ? "▸" : "▾"}</button>
-      <span class="session-name">${escapeHtml(sess.name)}</span>
-      <button class="icon-btn" data-act="del-session" title="세션 삭제">🗑️</button>
+function renderSessionDetailView(wrap, subj, sess) {
+  const backRow = document.createElement("div");
+  backRow.className = "session-detail-back-row";
+  backRow.innerHTML = `<button class="back-btn" id="sessionBackBtn">‹ ${escapeHtml(subj.name)}</button>`;
+  backRow.querySelector("#sessionBackBtn").addEventListener("click", () => {
+    subjectView = { subjectId: subj.id, sessionId: null };
+    renderSubjects();
+  });
+  wrap.appendChild(backRow);
+
+  const done = sess.lectures.filter(l => l.completed).length;
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `
+    <div class="session-detail-head">
+      <div>
+        <div class="session-detail-name">${escapeHtml(sess.name)}</div>
+        <div class="session-detail-meta">${done} / ${sess.lectures.length}강</div>
+      </div>
+      <button class="icon-btn" id="sessionMenuBtn" title="더보기">⋯</button>
     </div>
-    <div class="lecture-list" style="${sess.collapsed ? "display:none" : ""}"></div>
-    <div class="add-row" style="${sess.collapsed ? "display:none" : ""}">
-      <input type="text" placeholder="새 강의 이름 (예: 4강)" data-role="new-lecture" />
-      <button data-act="add-lecture">추가</button>
+    <div class="lecture-list" id="sessionLectureList"></div>
+    <button class="add-inline-btn" id="addLectureBtn">＋ 강의 추가</button>
+  `;
+  const lectureList = card.querySelector("#sessionLectureList");
+  if (sess.lectures.length === 0) {
+    lectureList.innerHTML = `<div class="empty-note">아직 강의가 없어요.</div>`;
+  } else {
+    sess.lectures.forEach((lec) => lectureList.appendChild(renderLectureRow(subj, sess, lec)));
+  }
+
+  card.querySelector("#sessionMenuBtn").addEventListener("click", async () => {
+    const choice = await actionSheet([
+      { label: "✏️  세션 이름 변경" },
+      { label: "🗑️  세션 삭제", danger: true },
+    ]);
+    if (choice === 0) {
+      const name = await promptModal("새 세션 이름", sess.name);
+      if (!name) return;
+      sess.name = name; save(); renderSubjects();
+    } else if (choice === 1) {
+      const ok = await confirmModal(`'${sess.name}' 세션을 삭제할까요?`);
+      if (!ok) return;
+      subj.sessions = subj.sessions.filter(s => s.id !== sess.id);
+      subjectView = { subjectId: subj.id, sessionId: null };
+      save(); renderSubjects(); renderDashboard();
+    }
+  });
+
+  card.querySelector("#addLectureBtn").addEventListener("click", () => openAddLectureSheet(subj, sess));
+
+  wrap.appendChild(card);
+}
+
+/* 강의 추가 바텀시트: 한 개씩 추가하거나, 줄바꿈 붙여넣기 / 번호 자동생성으로 여러 개를 한번에 추가한다. */
+function openAddLectureSheet(subj, sess) {
+  const body = document.createElement("div");
+  body.className = "lecture-add-sheet";
+  body.innerHTML = `
+    <div class="seg-tabs" data-role="mode-tabs">
+      <button class="seg-tab is-active" data-mode="single">한 개 추가</button>
+      <button class="seg-tab" data-mode="multi">여러 개 추가</button>
+    </div>
+    <div class="lecture-add-pane" data-pane="single">
+      <label>강의 이름
+        <input type="text" id="laSingleName" placeholder="예: 4강 소화이론" />
+      </label>
+      <button class="btn btn-primary" id="laSingleSave">추가</button>
+    </div>
+    <div class="lecture-add-pane" data-pane="multi" hidden>
+      <div class="seg-tabs seg-tabs-sub" data-role="submode-tabs">
+        <button class="seg-tab is-active" data-submode="paste">줄바꿈으로 입력</button>
+        <button class="seg-tab" data-submode="range">번호로 자동 생성</button>
+      </div>
+      <div class="lecture-add-subpane" data-subpane="paste">
+        <label>강의 목록 (한 줄에 하나씩)
+          <textarea id="laPasteText" rows="6" placeholder="1강 OT&#10;2강 소방의 개념&#10;3강 연소이론"></textarea>
+        </label>
+      </div>
+      <div class="lecture-add-subpane" data-subpane="range" hidden>
+        <div class="range-row">
+          <label>시작 번호<input type="number" id="laRangeStart" value="1" /></label>
+          <label>끝 번호<input type="number" id="laRangeEnd" value="10" /></label>
+        </div>
+        <label>강의명 (숫자 자리에 {n})
+          <input type="text" id="laRangeTemplate" placeholder="예: 기본이론 {n}강" value="기본이론 {n}강" />
+        </label>
+      </div>
+      <button class="btn btn-primary" id="laMultiSave">전체 추가</button>
     </div>
   `;
-  const lectureList = block.querySelector(".lecture-list");
-  sess.lectures.forEach((lec) => lectureList.appendChild(renderLectureRow(subj, sess, lec)));
+  sheetShow("강의 추가", body);
+  document.getElementById("sheetBack").hidden = true;
+  bindSheetChrome(() => sheetHide());
 
-  block.querySelector('[data-act="toggle"]').addEventListener("click", () => {
-    sess.collapsed = !sess.collapsed; save(); renderSubjects();
-  });
-  block.querySelector('[data-act="del-session"]').addEventListener("click", async () => {
-    const ok = await confirmModal(`'${sess.name}' 세션을 삭제할까요?`);
-    if (!ok) return;
-    subj.sessions = subj.sessions.filter(s => s.id !== sess.id);
-    save(); renderSubjects(); renderDashboard();
-  });
-  block.querySelector('[data-act="add-lecture"]').addEventListener("click", () => {
-    const input = block.querySelector('[data-role="new-lecture"]');
-    if (!input.value.trim()) return;
-    sess.lectures.push({
-      id: uid("lec"), name: input.value.trim(), completed: false, completedDate: null,
-      reviews: [], memo: "", favorite: false, attachments: [],
+  const modeTabs = body.querySelector('[data-role="mode-tabs"]').querySelectorAll(".seg-tab");
+  modeTabs.forEach((tab) => tab.addEventListener("click", () => {
+    modeTabs.forEach((t) => t.classList.toggle("is-active", t === tab));
+    body.querySelectorAll("[data-pane]").forEach((p) => { p.hidden = p.dataset.pane !== tab.dataset.mode; });
+  }));
+  const subTabs = body.querySelector('[data-role="submode-tabs"]').querySelectorAll(".seg-tab");
+  subTabs.forEach((tab) => tab.addEventListener("click", () => {
+    subTabs.forEach((t) => t.classList.toggle("is-active", t === tab));
+    body.querySelectorAll("[data-subpane]").forEach((p) => { p.hidden = p.dataset.subpane !== tab.dataset.submode; });
+  }));
+
+  function addLectures(names) {
+    const clean = names.map((n) => n.trim()).filter(Boolean);
+    if (clean.length === 0) { toast("추가할 강의가 없어요"); return; }
+    clean.forEach((name) => {
+      sess.lectures.push({
+        id: uid("lec"), name, completed: false, completedDate: null,
+        reviews: [], memo: "", favorite: false, attachments: [],
+      });
     });
-    input.value = "";
-    save(); renderSubjects(); renderDashboard();
-  });
+    save(); sheetHide(); renderSubjects(); renderDashboard();
+    toast(`강의 ${clean.length}개를 추가했어요`);
+  }
 
-  return block;
+  body.querySelector("#laSingleSave").addEventListener("click", () => {
+    addLectures([body.querySelector("#laSingleName").value]);
+  });
+  body.querySelector("#laMultiSave").addEventListener("click", () => {
+    const activeSub = body.querySelector('[data-role="submode-tabs"] .seg-tab.is-active').dataset.submode;
+    if (activeSub === "paste") {
+      addLectures(body.querySelector("#laPasteText").value.split("\n"));
+    } else {
+      const start = Math.round(Number(body.querySelector("#laRangeStart").value));
+      const end = Math.round(Number(body.querySelector("#laRangeEnd").value));
+      const tmpl = body.querySelector("#laRangeTemplate").value.trim() || "{n}강";
+      if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) { toast("번호를 확인해주세요"); return; }
+      if (end - start > 200) { toast("한 번에 200개까지 추가할 수 있어요"); return; }
+      const names = [];
+      for (let n = start; n <= end; n++) names.push(tmpl.replace(/\{n\}/g, n));
+      addLectures(names);
+    }
+  });
 }
 
 /* 강의 완료 상태를 studyLogs와 항상 동기화해서 바꿔주는 헬퍼.
@@ -3325,6 +3545,12 @@ function renderBackupStatus() {
    APP_VERSION_DATE 두 값만 바꿔주세요.
    기준: 큰 기능 추가 = Minor(1.X.0), 작은 개선/버그수정 = Patch(1.0.X)
 
+   v1.2.0 (2026-09-02)
+   - 대시보드 공부 달력에 이전/다음 달 이동 추가, 날짜 클릭 시 공부 달력 탭으로 이동해 해당 날짜 기록을 바로 표시
+   - 과목관리 화면 전면 개편: 과목 목록 → 세션 선택 → 강의 목록 2단계 구조로 재구성해 화면 길이 문제 해결
+   - 과목/세션/강의 추가·수정·삭제 UI를 버튼/⋯메뉴로 정리 (입력창 상시 노출 제거)
+   - 강의 일괄 추가 기능 추가: 줄바꿈 붙여넣기 또는 시작~끝 번호+템플릿으로 여러 강의 한번에 생성
+
    v1.1.2 (2026-07-08)
    - 공부 시간 기록 시 "공부한 날짜"를 직접 선택 가능하도록 개선 (자정 이후 입력해도 실제 공부한 날짜로 기록)
    - 대시보드 "최근 공부한 강의"·공부 달력 날짜별 기록에 삭제 버튼 추가
@@ -3345,8 +3571,8 @@ function renderBackupStatus() {
    v1.0.3 이전
    - 초기 대시보드/과목관리/복습관리/공부달력/즐겨찾기/통계/설정 기본 구조
    ============================================================ */
-const APP_VERSION = "1.1.2";
-const APP_VERSION_DATE = "2026-07-08";
+const APP_VERSION = "1.2.0";
+const APP_VERSION_DATE = "2026-09-02";
 
 function renderSettingsForm() {
   document.getElementById("setGoalLectures").value = DATA.settings.dailyGoalLectures;
