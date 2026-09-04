@@ -340,6 +340,93 @@ h1, h2, h3, p { margin: 0; }
   border-radius: 999px;
 }
 
+/* ============================================================
+   대시보드 개편: 오늘 바로 공부하는 화면
+   ============================================================ */
+
+/* 1. 오늘 요약 카드 */
+.today-summary-card { padding: 16px 18px; margin-bottom: 12px; }
+.today-summary-date { font-size: 13px; font-weight: 800; color: var(--text-muted); margin-bottom: 10px; }
+.today-summary-chips {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.chip-stat {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg-soft);
+  border-radius: 10px; padding: 9px 10px;
+  font-size: 12.5px; font-weight: 700; color: var(--text);
+}
+.chip-ico { font-size: 13px; flex-shrink: 0; }
+
+/* 2. 공부 기록 버튼 */
+.quick-log-btn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  border: none; background: var(--ember);
+  color: #fff; font-size: 15px; font-weight: 800;
+  padding: 15px; border-radius: var(--radius-md);
+  margin-bottom: 12px;
+  box-shadow: 0 8px 18px rgba(255,106,61,.28);
+}
+.quick-log-btn:hover { background: #FF5A29; }
+.quick-log-btn-ico { font-size: 17px; font-weight: 800; }
+
+.dday-card-v2 { margin-bottom: 12px; }
+
+/* 3. 이어 공부하기 */
+.continue-row {
+  padding: 12px; background: var(--bg-soft); border-radius: 13px;
+  margin-bottom: 8px;
+}
+.continue-row:last-child { margin-bottom: 0; }
+.continue-row-top { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+.continue-row-subj { font-size: 13.5px; font-weight: 800; color: var(--text); }
+.continue-row-sess { font-size: 11.5px; font-weight: 600; color: var(--text-muted); }
+.continue-row-btn {
+  width: 100%; border: none; background: var(--surface);
+  border-radius: 10px; padding: 10px; text-align: left;
+  font-size: 13px; font-weight: 700; color: var(--sky);
+  box-shadow: var(--shadow-card);
+}
+.continue-row-btn:hover { background: var(--sky-soft); }
+
+/* 4. 오늘 공부 기록 */
+.today-empty { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.today-empty .btn { align-self: stretch; text-align: center; }
+.clickable-log-row { cursor: pointer; border-radius: 10px; }
+.clickable-log-row:hover { background: var(--bg-soft); }
+
+/* 5. 이번 주 진행률 */
+.week-progress-top { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.week-progress-top .pct { color: var(--ember); font-weight: 800; }
+.week-days-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 14px; }
+.week-day-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 2px; border-radius: 10px; background: var(--bg-soft);
+}
+.week-day-chip.is-today { background: var(--ember-soft); }
+.week-day-label { font-size: 10px; font-weight: 700; color: var(--text-faint); }
+.week-day-val { font-size: 11px; font-weight: 800; color: var(--text); }
+
+/* 부가 정보 섹션 라벨 */
+.dashboard-secondary-label {
+  font-size: 11.5px; font-weight: 800; color: var(--text-faint);
+  margin: 22px 2px 10px;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+
+/* 대시보드 공부 기록 폼 (바텀시트) */
+.quicklog-form { display: flex; flex-direction: column; gap: 14px; }
+.quicklog-form label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 700; color: var(--text-muted); }
+.quicklog-form select, .quicklog-form input, .quicklog-form textarea {
+  width: 100%; box-sizing: border-box; min-width: 0;
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 11px 13px; font-size: 13.5px; font-weight: 600; color: var(--text);
+  background: var(--bg-soft); font-family: inherit;
+}
+.quicklog-form textarea { resize: vertical; line-height: 1.6; }
+.quicklog-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
 .pages { padding: 20px 36px 60px; }
 .page { display: none; }
 .page.is-active { display: block; animation: fadeIn .25s ease; }
@@ -532,7 +619,9 @@ h1, h2, h3, p { margin: 0; }
   cursor: pointer;
 }
 .mini-cal-day:hover { background: var(--sky-soft); color: var(--sky); }
-.mini-cal-day.has-log { background: var(--ember-soft); color: var(--ember); }
+.mini-cal-day.heat-1 { background: #FFE9DE; color: var(--ember); }
+.mini-cal-day.heat-2 { background: #FFC1A3; color: #B84A22; }
+.mini-cal-day.heat-3 { background: var(--ember); color: #fff; }
 .mini-cal-day.is-today { outline: 1.5px solid var(--ember); }
 .mini-cal-day.empty { visibility: hidden; cursor: default; }
 
@@ -1209,47 +1298,101 @@ h1, h2, h3, p { margin: 0; }
           <span class="greet-msg" id="greetMsg">소공이, 오늘도 파이팅!</span>
         </div>
 
-        <div class="stat-row">
-          <div class="card stat-card stat-ember">
-            <div class="stat-top">
-              <span class="stat-label">D-Day</span>
-              <span class="stat-ico">🔥</span>
+        <!-- 1. 오늘 날짜 + 핵심 통계 (압축 요약) -->
+        <div class="card today-summary-card">
+          <div class="today-summary-date" id="todaySummaryDate">9월 4일 금요일</div>
+          <div class="today-summary-chips">
+            <div class="chip-stat">
+              <span class="chip-ico">🔥</span>
+              <span id="chipStreak">0일 연속</span>
             </div>
-            <div class="stat-value" id="stat-dday">D-0</div>
-            <div class="stat-sub" id="stat-dday-sub">목표를 설정해보세요</div>
-            <div class="dday-mini-list" id="ddayMiniList"></div>
-            <span class="stat-mascot"><img data-mascot="goal" alt="소공이" /></span>
-          </div>
-
-          <div class="card stat-card">
-            <div class="stat-top">
-              <span class="stat-label">오늘 공부한 강의</span>
+            <div class="chip-stat">
+              <span class="chip-ico">📚</span>
+              <span id="chipLectures">오늘 0강</span>
             </div>
-            <div class="stat-value"><span id="stat-lectures">0</span><span class="stat-unit">강</span></div>
-            <div class="stat-sub" id="stat-lectures-sub">아직 기록이 없어요</div>
-            <span class="stat-mascot stat-mascot-sm"><img data-mascot="study" alt="소공이" /></span>
-          </div>
-
-          <div class="card stat-card">
-            <div class="stat-top">
-              <span class="stat-label">오늘 공부 시간</span>
+            <div class="chip-stat">
+              <span class="chip-ico">⏱</span>
+              <span id="chipTime">오늘 0분</span>
             </div>
-            <div class="stat-value" id="stat-time">0분</div>
-            <div class="stat-sub" id="stat-time-sub">천천히 시작해봐요</div>
-            <button class="stat-add-btn" id="logTimeBtn">+ 시간 기록</button>
-            <span class="stat-mascot stat-mascot-sm"><img data-mascot="clock" alt="소공이" /></span>
-          </div>
-
-          <div class="card stat-card">
-            <div class="stat-top">
-              <span class="stat-label">연속 공부일</span>
+            <div class="chip-stat">
+              <span class="chip-ico">🎯</span>
+              <span id="chipWeekGoal">주간목표 0%</span>
             </div>
-            <div class="stat-value"><span id="stat-streak">0</span><span class="stat-unit">일</span></div>
-            <div class="stat-sub" id="stat-streak-sub">오늘부터 시작해요</div>
-            <span class="stat-mascot stat-mascot-sm" id="streakMascot"><img data-mascot="fist" alt="소공이" /></span>
           </div>
         </div>
 
+        <!-- 2. 공부 기록 버튼 -->
+        <button class="quick-log-btn" id="quickLogBtn">
+          <span class="quick-log-btn-ico">＋</span> 공부 기록
+        </button>
+
+        <!-- D-Day (기존 기능 유지: 가장 가까운 시험 + 다음 시험 미니 리스트) -->
+        <div class="card stat-card stat-ember dday-card-v2">
+          <div class="stat-top">
+            <span class="stat-label">D-Day</span>
+            <span class="stat-ico">🔥</span>
+          </div>
+          <div class="stat-value" id="stat-dday">D-0</div>
+          <div class="stat-sub" id="stat-dday-sub">목표를 설정해보세요</div>
+          <div class="dday-mini-list" id="ddayMiniList"></div>
+          <span class="stat-mascot"><img data-mascot="goal" alt="소공이" /></span>
+        </div>
+
+        <!-- 3. 이어 공부하기 -->
+        <div class="card">
+          <div class="card-head">
+            <h3>이어 공부하기</h3>
+          </div>
+          <div class="card-body" id="continueList"></div>
+        </div>
+
+        <!-- 4. 오늘 공부 기록 -->
+        <div class="card">
+          <div class="card-head">
+            <h3>오늘 공부 기록</h3>
+          </div>
+          <div class="card-body" id="todayLogList"></div>
+        </div>
+
+        <!-- 5. 이번 주 진행률 -->
+        <div class="card">
+          <div class="card-head">
+            <h3>이번 주</h3>
+          </div>
+          <div class="card-body">
+            <div class="week-progress-top">
+              <span id="weekMinutesLabel">0분 / 목표 0시간</span>
+              <span class="pct" id="weekPct">0%</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" id="weekBarFill" style="width:0%; background:var(--ember)"></div></div>
+            <div class="week-days-row" id="weekDaysRow"></div>
+          </div>
+        </div>
+
+        <!-- 6. 공부 달력 + 7. 즐겨찾기 -->
+        <div class="bottom-grid">
+          <div class="card">
+            <div class="card-head">
+              <h3 id="miniCalTitle">공부 달력</h3>
+              <div class="cal-nav">
+                <button class="icon-btn" id="miniCalPrev">‹</button>
+                <button class="icon-btn" id="miniCalNext">›</button>
+              </div>
+            </div>
+            <div class="card-body" id="miniCalendar"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>즐겨찾기 강의</h3>
+              <button class="link-btn" data-page="favorites">더보기</button>
+            </div>
+            <div class="card-body" id="favList"></div>
+          </div>
+        </div>
+
+        <!-- 부가 정보: 과목별 진행률 / 오늘 할 일 / 최근 공부한 강의 / 회독 현황 (아래로 이동) -->
+        <div class="dashboard-secondary-label">더 보기</div>
         <div class="mid-grid">
           <div class="card">
             <div class="card-head">
@@ -1280,27 +1423,6 @@ h1, h2, h3, p { margin: 0; }
               <button class="link-btn" data-page="review">자세히</button>
             </div>
             <div class="card-body" id="roundList"></div>
-          </div>
-        </div>
-
-        <div class="bottom-grid">
-          <div class="card">
-            <div class="card-head">
-              <h3 id="miniCalTitle">공부 달력</h3>
-              <div class="cal-nav">
-                <button class="icon-btn" id="miniCalPrev">‹</button>
-                <button class="icon-btn" id="miniCalNext">›</button>
-              </div>
-            </div>
-            <div class="card-body" id="miniCalendar"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-head">
-              <h3>즐겨찾기 강의</h3>
-              <button class="link-btn" data-page="favorites">더보기</button>
-            </div>
-            <div class="card-body" id="favList"></div>
           </div>
         </div>
 
@@ -1427,6 +1549,9 @@ h1, h2, h3, p { margin: 0; }
             </label>
             <label>하루 목표 공부 시간(분)
               <input type="number" min="0" id="setGoalMinutes" />
+            </label>
+            <label>주간 목표 공부 시간(시간)
+              <input type="number" min="0" id="setGoalWeeklyHours" />
             </label>
           </div>
         </div>
@@ -1674,6 +1799,7 @@ function createSeedData() {
     settings: {
       dailyGoalLectures: 3,
       dailyGoalMinutes: 120,
+      weeklyGoalMinutes: 1200,
       dark: false,
     },
     subjects: [
@@ -1712,7 +1838,7 @@ function createEmptyData() {
     version: DATA_VERSION,
     meta: { examName: "", examDate: "", createdAt: now, lastBackupAt: null },
     exams: [],
-    settings: { dailyGoalLectures: 3, dailyGoalMinutes: 120, dark: false },
+    settings: { dailyGoalLectures: 3, dailyGoalMinutes: 120, weeklyGoalMinutes: 1200, dark: false },
     subjects: [],
     todos: [],
     studyLogs: [],
@@ -1762,7 +1888,7 @@ function migrateData(data) {
     }
   }
   data.settings = Object.assign(
-    { dailyGoalLectures: 3, dailyGoalMinutes: 120, dark: false },
+    { dailyGoalLectures: 3, dailyGoalMinutes: 120, weeklyGoalMinutes: 1200, dark: false },
     data.settings || {}
   );
   data.subjects = data.subjects || [];
@@ -2131,7 +2257,139 @@ function pickMinutes(title, { allowSkip = true, initialDate } = {}) {
   });
 }
 
-/* 대시보드 "+ 시간 기록": 과목 → 세션 → 강의(또는 기타 공부) → 공부 시간 순서로 기록 */
+/* 대시보드 "+ 공부 기록": 과목/세션/강의를 드롭다운으로 고르고
+   공부 시간·완료 여부·복습 여부·메모까지 한 화면에서 기록한다.
+   기존 setLectureCompleted / setReviewCount / logStudy 를 그대로 재사용해서
+   완료·복습·공부시간 데이터가 새로 갈라지지 않고 기존 studyLogs 하나로 모이게 한다. */
+function openQuickLogSheet() {
+  const body = document.createElement("div");
+  body.className = "quicklog-form";
+  body.innerHTML = `
+    <label>과목
+      <select id="qlSubject"><option value="">기타 공부 (과목 없음)</option></select>
+    </label>
+    <label>세션
+      <select id="qlSession" disabled><option value="">과목을 먼저 선택하세요</option></select>
+    </label>
+    <label>강의
+      <select id="qlLecture" disabled><option value="">세션을 먼저 선택하세요</option></select>
+    </label>
+    <div class="quicklog-row2">
+      <label>공부 시간(분)
+        <input type="number" id="qlMinutes" min="0" placeholder="예: 60" />
+      </label>
+      <label>날짜
+        <input type="date" id="qlDate" value="${todayStr()}" max="${todayStr()}" />
+      </label>
+    </div>
+    <label class="check-row"><input type="checkbox" id="qlComplete" /> 수강 완료</label>
+    <label class="check-row"><input type="checkbox" id="qlReview" /> 복습 완료</label>
+    <label>메모
+      <textarea id="qlMemo" rows="2" placeholder="선택 입력"></textarea>
+    </label>
+    <button class="btn btn-primary" id="qlSubmit">기록하기</button>
+  `;
+
+  const subjSel = body.querySelector("#qlSubject");
+  const sessSel = body.querySelector("#qlSession");
+  const lecSel = body.querySelector("#qlLecture");
+  const completeChk = body.querySelector("#qlComplete");
+
+  DATA.subjects.forEach((s) => {
+    const opt = document.createElement("option");
+    opt.value = s.id; opt.textContent = `${s.icon} ${s.name}`;
+    subjSel.appendChild(opt);
+  });
+
+  subjSel.addEventListener("change", () => {
+    const subj = DATA.subjects.find(s => s.id === subjSel.value);
+    sessSel.innerHTML = "";
+    lecSel.innerHTML = `<option value="">세션을 먼저 선택하세요</option>`;
+    lecSel.disabled = true;
+    completeChk.checked = false;
+    if (!subj) { sessSel.innerHTML = `<option value="">과목을 먼저 선택하세요</option>`; sessSel.disabled = true; return; }
+    sessSel.disabled = false;
+    if (subj.sessions.length === 0) {
+      sessSel.innerHTML = `<option value="">세션이 없어요</option>`;
+      return;
+    }
+    sessSel.innerHTML = `<option value="">세션 선택</option>` + subj.sessions.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("");
+  });
+
+  sessSel.addEventListener("change", () => {
+    const subj = DATA.subjects.find(s => s.id === subjSel.value);
+    const sess = subj && subj.sessions.find(s => s.id === sessSel.value);
+    lecSel.innerHTML = "";
+    completeChk.checked = false;
+    if (!sess) { lecSel.innerHTML = `<option value="">세션을 먼저 선택하세요</option>`; lecSel.disabled = true; return; }
+    lecSel.disabled = false;
+    if (sess.lectures.length === 0) {
+      lecSel.innerHTML = `<option value="">강의가 없어요</option>`;
+      return;
+    }
+    lecSel.innerHTML = `<option value="">강의 선택 (선택 안 해도 시간만 기록 가능)</option>` +
+      sess.lectures.map(l => `<option value="${l.id}">${l.completed ? "✅ " : ""}${escapeHtml(l.name)}</option>`).join("");
+  });
+
+  lecSel.addEventListener("change", () => {
+    const subj = DATA.subjects.find(s => s.id === subjSel.value);
+    const sess = subj && subj.sessions.find(s => s.id === sessSel.value);
+    const lec = sess && sess.lectures.find(l => l.id === lecSel.value);
+    completeChk.checked = !!(lec && lec.completed);
+  });
+
+  sheetShow("오늘 공부 기록", body);
+  document.getElementById("sheetBack").hidden = true;
+  bindSheetChrome(() => sheetHide());
+
+  body.querySelector("#qlSubmit").addEventListener("click", () => {
+    const subj = DATA.subjects.find(s => s.id === subjSel.value) || null;
+    const sess = subj && subj.sessions.find(s => s.id === sessSel.value) || null;
+    const lec = sess && sess.lectures.find(l => l.id === lecSel.value) || null;
+    const minutes = Math.max(0, Math.round(Number(body.querySelector("#qlMinutes").value) || 0));
+    const dateStr = body.querySelector("#qlDate").value || todayStr();
+    const wantComplete = body.querySelector("#qlComplete").checked;
+    const wantReview = body.querySelector("#qlReview").checked;
+    const memo = body.querySelector("#qlMemo").value.trim();
+
+    if (!lec && minutes === 0 && !wantComplete && !wantReview) {
+      toast("기록할 내용을 입력해주세요");
+      return;
+    }
+
+    if (lec) {
+      if (wantComplete && !lec.completed) {
+        setLectureCompleted(lec, subj, sess, true, minutes, dateStr);
+      } else if (minutes > 0) {
+        logStudy(DATA, {
+          lectureId: lec.id, subjectId: subj.id, minutes, date: dateStr, type: "manual", kind: "lecture",
+          color: subj.color, subjectName: subj.name, subjectIcon: subj.icon, sessionName: sess ? sess.name : "", lectureName: lec.name,
+          label: `${subj.name} · ${lec.name}`,
+        });
+      }
+      if (wantReview) {
+        setReviewCount(lec, subj, sess, lec.reviews.length + 1, 0, dateStr);
+      }
+      if (memo) {
+        lec.memo = lec.memo ? `${lec.memo}\n${memo}` : memo;
+      }
+    } else if (minutes > 0) {
+      logStudy(DATA, {
+        lectureId: null, subjectId: subj ? subj.id : null, minutes, date: dateStr, type: "other", kind: "other",
+        color: subj ? subj.color : "var(--sky)", subjectName: subj ? subj.name : "기타 공부", subjectIcon: subj ? subj.icon : "✏️",
+        label: subj ? subj.name : "기타 공부",
+      });
+    }
+
+    save(); sheetHide();
+    renderDashboard(); renderCalendarPage(); renderStats(); renderSubjects(); renderReview(); renderFavorites();
+    toast("공부 기록을 저장했어요 🔥");
+  });
+}
+
+/* 대시보드 "+ 시간 기록"(예전 버전) : 과목 → 세션 → 강의(또는 기타 공부) → 공부 시간 순서로 기록.
+   지금은 openQuickLogSheet()가 이 기능을 포함해 더 폭넓게 대체하고 있어 버튼에는 연결돼 있지 않지만,
+   기존 로직은 그대로 남겨둔다. */
 function openStudyTimeWizard() {
   const state = { subj: null, sess: null, lec: null };
 
@@ -2377,9 +2635,9 @@ function bindDashboard() {
     save(); renderDashboard();
   });
 
-  document.getElementById("logTimeBtn").addEventListener("click", (e) => {
+  document.getElementById("quickLogBtn").addEventListener("click", (e) => {
     e.stopPropagation();
-    openStudyTimeWizard();
+    openQuickLogSheet();
   });
 
   document.getElementById("miniCalPrev").addEventListener("click", () => {
@@ -2398,6 +2656,20 @@ function renderDashboard() {
   const lecturesToday = new Set(logsToday.filter(l => l.lectureId).map(l => l.lectureId)).size;
   const minutesToday = logsToday.reduce((s, l) => s + (l.minutes || 0), 0);
   const streak = calcStreak(DATA);
+
+  // 1. 오늘 날짜 + 핵심 통계 요약
+  const now = new Date();
+  const days = ["일","월","화","수","목","금","토"];
+  document.getElementById("todaySummaryDate").textContent = `${now.getMonth()+1}월 ${now.getDate()}일 ${days[now.getDay()]}요일`;
+  document.getElementById("chipStreak").textContent = `${streak}일 연속`;
+  document.getElementById("chipLectures").textContent = `오늘 ${lecturesToday}강`;
+  document.getElementById("chipTime").textContent =
+    `오늘 ${minutesToday >= 60 ? Math.floor(minutesToday/60) + "시간 " + (minutesToday%60) + "분" : minutesToday + "분"}`;
+  const weekGoalMin = DATA.settings.weeklyGoalMinutes || 1200;
+  const weekDays = getWeekRange(today);
+  const weekMinutes = weekDays.reduce((s, ds) => s + getLogsForDate(DATA, ds).reduce((s2,l)=>s2+(l.minutes||0),0), 0);
+  const weekPct = weekGoalMin > 0 ? Math.min(100, Math.round((weekMinutes / weekGoalMin) * 100)) : 0;
+  document.getElementById("chipWeekGoal").textContent = `주간목표 ${weekPct}%`;
 
   // D-Day: 여러 시험 중 가장 가까운(오늘 이후) 시험을 메인으로, 나머지는 아래 작은 리스트로
   const ddayEl = document.getElementById("stat-dday");
@@ -2422,40 +2694,139 @@ function renderDashboard() {
     ddaySub.textContent = "설정에서 시험일을 등록해보세요";
   }
 
-  document.getElementById("stat-lectures").textContent = lecturesToday;
-  document.getElementById("stat-lectures-sub").textContent =
-    (DATA.settings.dailyGoalLectures > 0 && lecturesToday >= DATA.settings.dailyGoalLectures)
-      ? "오늘 목표 달성! 🎉"
-      : `목표 ${DATA.settings.dailyGoalLectures}강 중 ${lecturesToday}강`;
-
-  document.getElementById("stat-time").textContent =
-    minutesToday >= 60 ? `${Math.floor(minutesToday/60)}시간 ${minutesToday%60}분` : `${minutesToday}분`;
-  document.getElementById("stat-time-sub").textContent =
-    (DATA.settings.dailyGoalMinutes > 0 && minutesToday >= DATA.settings.dailyGoalMinutes)
-      ? "오늘 목표 달성! 🎉"
-      : `목표 ${DATA.settings.dailyGoalMinutes}분 중 ${minutesToday}분`;
-
-  document.getElementById("stat-streak").textContent = streak;
-  const streakSubEl = document.getElementById("stat-streak-sub");
-  const streakMascotImg = document.querySelector("#streakMascot img");
-  if (streak > 0) {
-    streakSubEl.textContent = "이 기세를 이어가요!";
-    streakMascotImg.src = mascotSrc("fist");
-  } else if (DATA.studyLogs.length > 0) {
-    streakSubEl.textContent = "잠깐 쉬었네요, 다시 시작해요";
-    streakMascotImg.src = mascotSrc("rest");
-  } else {
-    streakSubEl.textContent = "오늘부터 시작해요";
-    streakMascotImg.src = mascotSrc("fist");
-  }
-
   updateBellBadge();
+  renderContinueList();
+  renderTodayLogList();
+  renderWeekProgress();
   renderProgressList();
   renderTodoList();
   renderRecentList();
   renderRoundList();
   renderMiniCalendar();
   renderFavList("favList", 5);
+}
+
+/* ---------------- 3. 이어 공부하기 ----------------
+   과목별로 studyLogs에 남은 마지막 활동 시각을 기준으로 "최근에 공부한 과목" 순서를 정하고,
+   그 과목에서 가장 최근에 완료한 강의 "다음"의 미완료 강의를 자동으로 찾아준다. */
+function getContinueStudyList() {
+  const lastActivityBySubject = {};
+  DATA.studyLogs.forEach((l) => {
+    if (!l.subjectId) return;
+    if (!lastActivityBySubject[l.subjectId] || (l.ts || 0) > lastActivityBySubject[l.subjectId]) {
+      lastActivityBySubject[l.subjectId] = l.ts || 0;
+    }
+  });
+
+  const ordered = [...DATA.subjects].sort((a, b) => (lastActivityBySubject[b.id] || 0) - (lastActivityBySubject[a.id] || 0));
+
+  const result = [];
+  ordered.forEach((subj) => {
+    const flat = [];
+    subj.sessions.forEach((sess) => sess.lectures.forEach((lec) => flat.push({ lec, sess })));
+    if (flat.length === 0) return;
+
+    let lastCompletedIdx = -1, lastCompletedTs = -1;
+    flat.forEach((item, idx) => {
+      if (!item.lec.completed) return;
+      const log = [...DATA.studyLogs].reverse().find(l => l.lectureId === item.lec.id && l.type === "lecture-complete");
+      const ts = log ? (log.ts || 0) : 0;
+      if (ts >= lastCompletedTs) { lastCompletedTs = ts; lastCompletedIdx = idx; }
+    });
+
+    let next = null;
+    for (let i = lastCompletedIdx + 1; i < flat.length; i++) {
+      if (!flat[i].lec.completed) { next = flat[i]; break; }
+    }
+    if (!next) next = flat.find((item) => !item.lec.completed);
+    if (!next) return; // 이 과목은 전부 완료함
+
+    result.push({ subj, sess: next.sess, lec: next.lec, doneCount: Math.max(0, lastCompletedIdx + 1) });
+  });
+  return result;
+}
+
+function renderContinueList() {
+  const wrap = document.getElementById("continueList");
+  wrap.innerHTML = "";
+  const list = getContinueStudyList().slice(0, 3);
+  if (list.length === 0) {
+    wrap.innerHTML = emptyMascot("아직 시작할 강의가 없어요. 과목관리에서 강의를 추가해보세요.", "study");
+    return;
+  }
+  list.forEach(({ subj, sess, lec, doneCount }) => {
+    const row = document.createElement("div");
+    row.className = "continue-row";
+    row.innerHTML = `
+      <div class="continue-row-top">
+        <span class="continue-row-subj">${subj.icon} ${escapeHtml(subj.name)}</span>
+        <span class="continue-row-sess">${escapeHtml(sess.name)} · ${doneCount}강까지 완료</span>
+      </div>
+      <button class="continue-row-btn">▶ ${escapeHtml(lec.name)} 시작하기</button>
+    `;
+    row.querySelector(".continue-row-btn").addEventListener("click", () => openLectureModal(lec, subj, sess));
+    wrap.appendChild(row);
+  });
+}
+
+/* ---------------- 4. 오늘 공부 기록 ---------------- */
+function renderTodayLogList() {
+  const wrap = document.getElementById("todayLogList");
+  wrap.innerHTML = "";
+  const logs = [...getLogsForDate(DATA, todayStr())].sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  if (logs.length === 0) {
+    wrap.innerHTML = `<div class="today-empty">${emptyMascot("오늘은 아직 공부 기록이 없어요.", "study")}<button class="btn btn-primary" id="firstLogBtn">＋ 첫 공부 기록</button></div>`;
+    const btn = document.getElementById("firstLogBtn");
+    if (btn) btn.addEventListener("click", openQuickLogSheet);
+    return;
+  }
+  logs.forEach((log) => {
+    const row = buildDeletableLogRow(log);
+    row.classList.add("clickable-log-row");
+    row.addEventListener("click", (e) => {
+      if (e.target.closest(".log-del-btn")) return;
+      if (!log.lectureId) return;
+      const found = getAllLectures(DATA).find(x => x.lec.id === log.lectureId);
+      if (found) openLectureModal(found.lec, found.subj, found.sess);
+    });
+    wrap.appendChild(row);
+  });
+}
+
+/* ---------------- 5. 이번 주 진행률 ---------------- */
+function getWeekRange(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  const dow = d.getDay(); // 0=일 ... 6=토
+  const diffToMonday = dow === 0 ? -6 : 1 - dow;
+  const monday = addDays(dateStr, diffToMonday);
+  const out = [];
+  for (let i = 0; i < 7; i++) out.push(addDays(monday, i));
+  return out;
+}
+function renderWeekProgress() {
+  const dayLabels = ["월","화","수","목","금","토","일"];
+  const week = getWeekRange(todayStr());
+  const minutesPerDay = week.map(ds => getLogsForDate(DATA, ds).reduce((s,l) => s + (l.minutes||0), 0));
+  const total = minutesPerDay.reduce((a,b) => a+b, 0);
+  const goalMin = DATA.settings.weeklyGoalMinutes || 1200;
+  const pct = goalMin > 0 ? Math.min(100, Math.round((total / goalMin) * 100)) : 0;
+  const fmt = (m) => m >= 60 ? `${Math.floor(m/60)}시간 ${m%60}분` : `${m}분`;
+
+  document.getElementById("weekMinutesLabel").textContent = `${fmt(total)} / 목표 ${Math.round(goalMin/60)}시간`;
+  document.getElementById("weekPct").textContent = `${pct}%`;
+  document.getElementById("weekBarFill").style.width = `${pct}%`;
+
+  const row = document.getElementById("weekDaysRow");
+  row.innerHTML = "";
+  const today = todayStr();
+  week.forEach((ds, i) => {
+    const m = minutesPerDay[i];
+    const hLabel = m === 0 ? "-" : (m >= 60 ? `${(m/60).toFixed(1).replace(/\.0$/,"")}h` : `${m}분`);
+    const el = document.createElement("div");
+    el.className = "week-day-chip" + (ds === today ? " is-today" : "");
+    el.innerHTML = `<span class="week-day-label">${dayLabels[i]}</span><span class="week-day-val">${hLabel}</span>`;
+    row.appendChild(el);
+  });
 }
 
 function updateBellBadge() {
@@ -2610,7 +2981,6 @@ function renderMiniCalendar() {
   const first = new Date(y, m, 1);
   const startDow = first.getDay();
   const daysInMonth = new Date(y, m + 1, 0).getDate();
-  const logDates = getStudyDatesSet(DATA);
   const today = todayStr();
 
   let html = `<div class="mini-cal-grid">`;
@@ -2618,8 +2988,12 @@ function renderMiniCalendar() {
   for (let i = 0; i < startDow; i++) html += `<div class="mini-cal-day empty"></div>`;
   for (let d = 1; d <= daysInMonth; d++) {
     const ds = dateToStr(new Date(y, m, d));
+    const minutes = getLogsForDate(DATA, ds).reduce((s, l) => s + (l.minutes || 0), 0);
     const cls = ["mini-cal-day"];
-    if (logDates.has(ds)) cls.push("has-log");
+    // 공부량에 따라 같은 색 계열로 명도만 다르게: 1시간 미만 / 1~3시간 / 3시간 이상
+    if (minutes >= 180) cls.push("heat-3");
+    else if (minutes >= 60) cls.push("heat-2");
+    else if (minutes > 0) cls.push("heat-1");
     if (ds === today) cls.push("is-today");
     html += `<div class="${cls.join(" ")}" data-date="${ds}">${d}</div>`;
   }
@@ -3468,10 +3842,12 @@ function confirmDeleteLog(log) {
 function bindSettings() {
   const goalLecEl = document.getElementById("setGoalLectures");
   const goalMinEl = document.getElementById("setGoalMinutes");
+  const goalWeekEl = document.getElementById("setGoalWeeklyHours");
   const darkEl = document.getElementById("setDark");
 
   goalLecEl.addEventListener("change", () => { DATA.settings.dailyGoalLectures = Number(goalLecEl.value)||0; save(); renderDashboard(); });
   goalMinEl.addEventListener("change", () => { DATA.settings.dailyGoalMinutes = Number(goalMinEl.value)||0; save(); renderDashboard(); });
+  goalWeekEl.addEventListener("change", () => { DATA.settings.weeklyGoalMinutes = Math.max(0, Number(goalWeekEl.value)||0) * 60; save(); renderDashboard(); });
   darkEl.addEventListener("change", () => { DATA.settings.dark = darkEl.checked; save(); applyDarkMode(); });
 
   document.getElementById("addExamBtn").addEventListener("click", () => openExamSheet(null));
@@ -3545,6 +3921,16 @@ function renderBackupStatus() {
    APP_VERSION_DATE 두 값만 바꿔주세요.
    기준: 큰 기능 추가 = Minor(1.X.0), 작은 개선/버그수정 = Patch(1.0.X)
 
+   v1.3.0 (2026-09-02)
+   - 대시보드를 "통계 확인용"에서 "매일 바로 공부하는 화면"으로 전면 개편
+     · 상단 요약을 4개 큰 카드 → 한 줄 요약 카드(연속/오늘강의/오늘시간/주간목표%)로 압축
+     · "+ 공부 기록" 버튼 추가 (과목→세션→강의 선택 + 시간/완료/복습/메모를 한 화면에서 기록)
+     · "이어 공부하기" 추가: 과목별 마지막 완료 강의 다음의 미완료 강의를 자동 추천
+     · "오늘 공부 기록" 추가: 오늘 기록만 모아 보여주고 클릭 시 강의 상세로 이동
+     · "이번 주" 진행률(주간 목표 대비 %, 요일별 공부량) 추가, 설정에 주간 목표 시간 입력 추가
+     · 기존 과목별 진행률/오늘 할 일/최근 공부한 강의/회독 현황 카드는 삭제하지 않고 "더 보기" 아래로 이동
+     · 대시보드 미니 달력에 공부량 3단계 명도 표시 적용
+
    v1.2.0 (2026-09-02)
    - 대시보드 공부 달력에 이전/다음 달 이동 추가, 날짜 클릭 시 공부 달력 탭으로 이동해 해당 날짜 기록을 바로 표시
    - 과목관리 화면 전면 개편: 과목 목록 → 세션 선택 → 강의 목록 2단계 구조로 재구성해 화면 길이 문제 해결
@@ -3571,12 +3957,13 @@ function renderBackupStatus() {
    v1.0.3 이전
    - 초기 대시보드/과목관리/복습관리/공부달력/즐겨찾기/통계/설정 기본 구조
    ============================================================ */
-const APP_VERSION = "1.2.0";
+const APP_VERSION = "1.3.0";
 const APP_VERSION_DATE = "2026-09-02";
 
 function renderSettingsForm() {
   document.getElementById("setGoalLectures").value = DATA.settings.dailyGoalLectures;
   document.getElementById("setGoalMinutes").value = DATA.settings.dailyGoalMinutes;
+  document.getElementById("setGoalWeeklyHours").value = Math.round((DATA.settings.weeklyGoalMinutes || 1200) / 60);
   document.getElementById("setDark").checked = !!DATA.settings.dark;
   document.getElementById("appVersion").textContent = `Version ${APP_VERSION}`;
   document.getElementById("appVersionDate").textContent = APP_VERSION_DATE;
